@@ -23,9 +23,9 @@ with DAG(
 
     # Tier 1: The compute resources (Parallel Start)
     passengers = [
-        EmptyOperator(task_id="prep_driver_vansh"),
-        EmptyOperator(task_id="prep_navigator_deepshe"),
-        EmptyOperator(task_id="prep_hero_service_dog")
+        EmptyOperator(task_id="prep_driver"),
+        EmptyOperator(task_id="prep_navigator"),
+        EmptyOperator(task_id="prep_dog")
     ]
 
     # Tier 2: The Data Extraction Phase
@@ -34,9 +34,9 @@ with DAG(
 
     # Tier 3: The Target Destinations (Specific partitions/tables)
     bags = [
-        EmptyOperator(task_id="pack_vanshs_duffel"),
-        EmptyOperator(task_id="pack_deepshes_suitcase"),
-        EmptyOperator(task_id="pack_heros_gear_bag")
+        EmptyOperator(task_id="pack_duffel"),
+        EmptyOperator(task_id="pack_suitcase"),
+        EmptyOperator(task_id="pack_dog_bag")
     ]
 
     # Tier 4: The Final Load Phase
