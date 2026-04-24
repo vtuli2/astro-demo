@@ -40,7 +40,7 @@ def multi_channel_sales_sync():
         """Pull the last hour of Shopify orders via the Admin GraphQL API."""
         print("Pulling Shopify orders for the last hour...")
         fake_count = 142
-        return {"channel": "shopify", "orders_synced": fake_count}
+        return {"channel": "shopify", "orders_synced": fake_count} #returning a made up dict
     @task
     def sync_amazon_orders() -> dict:
         """
@@ -51,32 +51,32 @@ def multi_channel_sales_sync():
         """
         print("Pulling Amazon orders (on high_memory queue)...")
         fake_count = 389
-        return {"channel": "amazon", "orders_synced": fake_count}
+        return {"channel": "amazon", "orders_synced": fake_count} #returning a made up dict
 
     @task
     def sync_ebay_orders() -> dict:
         """Pull the last hour of eBay orders via the Fulfillment API."""
         print("Pulling eBay orders for the last hour...")
         fake_count = 57
-        return {"channel": "ebay", "orders_synced": fake_count}
+        return {"channel": "ebay", "orders_synced": fake_count} #returning a made up dict
 
     @task
     def sync_direct_site_orders() -> dict:
         """Pull the last hour of direct-site orders from our internal orders DB."""
         print("Pulling direct-site orders for the last hour...")
         fake_count = 211
-        return {"channel": "direct_site", "orders_synced": fake_count}
+        return {"channel": "direct_site", "orders_synced": fake_count} #returning a made up dict
 
     # -----------------------------------------------------------------------
     # Fan-in: consolidate all four channels into one report
     # -----------------------------------------------------------------------
-    @task(trigger_rule="all_done")
+    @task(trigger_rule="all_done") #wait for other tasks to finish before this one triggers
     def consolidate_sales_report(
             shopify: dict,
             amazon: dict,
             ebay: dict,
             direct: dict,
-    ) -> dict:
+    ) -> dict: #accepts 4 dicts and outputs a single dict
         """
         Merge all four channels' results and write a consolidated row to
         Snowflake's `channel_sync_summary` table.
@@ -86,10 +86,10 @@ def multi_channel_sales_sync():
 
         print(f"Consolidated {total} orders across {len(results)} channels")
         for r in results:
-            print(f"  - {r['channel']}: {r['orders_synced']} orders")
+            print(f"  - {r['channel']}: {r['orders_synced']} orders") #printing the
 
         # Write the summary row
-        hook = SnowflakeHook(snowflake_conn_id="snowflake_default")
+        hook = SnowflakeHook(snowflake_conn_id="snowflake_default") #using shared snowflake connector
         sql = """
               INSERT INTO SHOPSMART.OPS.CHANNEL_SYNC_SUMMARY
                   (sync_timestamp_utc, total_orders, channels_succeeded)
