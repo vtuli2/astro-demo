@@ -14,7 +14,7 @@ with DAG(
     # ------------------------------------------------------------------------
     # 1. INITIALIZATION
     # ------------------------------------------------------------------------
-    start = EmptyOperator(task_id="announce_road_trip")
+    start = EmptyOperator(task_id="announce_road_trip") #empty operators setting start and end
     end = EmptyOperator(task_id="drive_away_exhausted")
 
     # ------------------------------------------------------------------------
@@ -22,7 +22,7 @@ with DAG(
     # ------------------------------------------------------------------------
 
     # Tier 1: The compute resources (Parallel Start)
-    passengers = [
+    passengers = [ #defining passengers as 3 parallel tasks
         EmptyOperator(task_id="prep_driver"),
         EmptyOperator(task_id="prep_navigator"),
         EmptyOperator(task_id="prep_dog")

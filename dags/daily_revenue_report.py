@@ -37,8 +37,8 @@ def daily_revenue_report():
     # -----------------------------------------------------------------------
     @task
     def extract_orders_from_snowflake(logical_date=None) -> list[dict]:
-        target_date = (logical_date - timedelta(days=1)).strftime("%Y-%m-%d")
-        hook = SnowflakeHook(snowflake_conn_id="snowflake_default")
+        target_date = (logical_date - timedelta(days=1)).strftime("%Y-%m-%d") #getting the date
+        hook = SnowflakeHook(snowflake_conn_id="snowflake_default") #using hook to get the connection details from AirFlow
         sql = """
               SELECT
                   order_id,
@@ -52,12 +52,12 @@ def daily_revenue_report():
                 AND order_status = 'COMPLETED' \
               """
 
-        records = hook.get_records(sql, parameters=(target_date,))
+        records = hook.get_records(sql, parameters=(target_date,)) #actually running the query
         columns = [
             "order_id", "customer_id", "product_id",
             "product_name", "order_total_usd", "order_timestamp",
         ]
-        orders = [dict(zip(columns, row)) for row in records]
+        orders = [dict(zip(columns, row)) for row in records] #converting the list of tuples to a list dictionary
 
         print(f"Extracted {len(orders)} completed orders for {target_date}")
         return orders
@@ -70,10 +70,10 @@ def daily_revenue_report():
         if not orders:
             return {"order_count": 0, "total_revenue": 0.0, "avg_order_value": 0.0}
 
-        revenues = [float(o["order_total_usd"]) for o in orders]
-        total_revenue = sum(revenues)
+        revenues = [float(o["order_total_usd"]) for o in orders] #creating a list of every order_total_usd from orders
+        total_revenue = sum(revenues) #adding everything up
 
-        return {
+        return { #returning a dict
             "order_count": len(orders),
             "total_revenue": round(total_revenue, 2),
             "avg_order_value": round(total_revenue / len(orders), 2),
@@ -84,7 +84,7 @@ def daily_revenue_report():
     # -----------------------------------------------------------------------
     @task
     def log_console_report(metrics: dict, logical_date=None) -> str:
-        target_date = (logical_date - timedelta(days=1)).strftime("%A, %B %d, %Y")
+        target_date = (logical_date - timedelta(days=1)).strftime("%A, %B %d, %Y") #date
 
         print("=" * 60)
         print(f"DAILY REVENUE REPORT: {target_date} ")
@@ -92,7 +92,7 @@ def daily_revenue_report():
         print(f" Total Revenue:       ${metrics['total_revenue']:,.2f}")
         print(f" Total Orders:        {metrics['order_count']:,}")
         print(f" Average Order Value: ${metrics['avg_order_value']:,.2f}")
-        print("-" * 60)
+        print("-" * 60) #readable printing the metrics
 
         return f"Console report logged for {target_date}"
 
