@@ -5,7 +5,6 @@ daily_revenue_report.py
 
 from __future__ import annotations
 from datetime import datetime, timedelta
-from collections import defaultdict
 from airflow.sdk import dag, task
 from airflow.providers.snowflake.hooks.snowflake import SnowflakeHook
 
@@ -69,27 +68,16 @@ def daily_revenue_report():
     @task
     def calculate_daily_metrics(orders: list[dict]) -> dict:
         if not orders:
-            return {"order_count": 0, "total_revenue": 0.0, "avg_order_value": 0.0, "top_products": []}
+            return {"order_count": 0, "total_revenue": 0.0, "avg_order_value": 0.0}
 
-        # Calculate totals
         revenues = [float(o["order_total_usd"]) for o in orders]
         total_revenue = sum(revenues)
 
-        # Aggregate product revenue using defaultdict for cleaner code
-        product_revenue = defaultdict(float)
-        for o in orders:
-            product_revenue[o["product_name"]] += float(o["order_total_usd"])
-
-        # Sort and get top 5
-        top_products = sorted(product_revenue.items(), key=lambda x: x[1], reverse=True)[:5]
-
-        metrics = {
+        return {
             "order_count": len(orders),
             "total_revenue": round(total_revenue, 2),
             "avg_order_value": round(total_revenue / len(orders), 2),
-            "top_products": [{"name": n, "revenue": round(r, 2)} for n, r in top_products],
         }
-        return metrics
 
     # -----------------------------------------------------------------------
     # Task 3: Log metrics to console in a UI-friendly format
@@ -105,16 +93,6 @@ def daily_revenue_report():
         print(f" Total Orders:        {metrics['order_count']:,}")
         print(f" Average Order Value: ${metrics['avg_order_value']:,.2f}")
         print("-" * 60)
-        print("TOP 5 PRODUCTS")
-        print("-" * 60)
-
-        if not metrics["top_products"]:
-            print(" No products sold yesterday.")
-        else:
-            for i, p in enumerate(metrics["top_products"], 1):
-                # .ljust(40) ensures the dollar signs align neatly
-                print(f" {i}. {p['name'].ljust(40)} ${p['revenue']:,.2f}")
-        print("=" * 60)
 
         return f"Console report logged for {target_date}"
 
@@ -131,7 +109,6 @@ def daily_revenue_report():
                   (report_date, report_name, subject_line, sent_at_utc)
               VALUES (%s, %s, %s, CURRENT_TIMESTAMP()) \
               """
-        # We pass the status_message into the subject_line column since email is removed
         hook.run(sql, parameters=(target_date, "daily_revenue_report_console", status_message))
         print(f"Audit row written for {target_date}")
 
