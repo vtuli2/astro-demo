@@ -20,7 +20,7 @@ default_args = {
     dag_id="daily_revenue_report",
     description="Daily executive revenue summary logged to console",
     schedule="0 12 * * *",
-    start_date=datetime(2025, 1, 1),
+    start_date=datetime(2026, 1, 1),
     catchup=False,
     default_args=default_args,
     tags=["shopsmart", "reporting", "executive", "snowflake"],
@@ -33,7 +33,7 @@ def daily_revenue_report():
     """
 
     # -----------------------------------------------------------------------
-    # Task 1: Extract (Unchanged)
+    # Task 1: Extract
     # -----------------------------------------------------------------------
     @task
     def extract_orders_from_snowflake(logical_date=None) -> list[dict]:
@@ -63,7 +63,7 @@ def daily_revenue_report():
         return orders
 
     # -----------------------------------------------------------------------
-    # Task 2: Calculate the headline metrics (Simplified)
+    # Task 2: Calculate the headline metrics
     # -----------------------------------------------------------------------
     @task
     def calculate_daily_metrics(orders: list[dict]) -> dict:
