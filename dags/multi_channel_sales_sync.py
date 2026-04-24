@@ -4,7 +4,7 @@ multi_channel_sales_sync.py
 
 from __future__ import annotations
 from datetime import datetime, timedelta
-from airflow.decorators import dag, task
+from airflow.sdk import dag, task
 from airflow.providers.snowflake.hooks.snowflake import SnowflakeHook
 
 default_args = {
@@ -21,7 +21,7 @@ default_args = {
     dag_id="multi_channel_sales_sync",
     description="Hourly parallel sync of orders from Shopify, Amazon, eBay, and direct site",
     schedule="@hourly",
-    start_date=datetime(2025, 1, 1),
+    start_date=datetime(2026, 1, 1),
     catchup=False,
     default_args=default_args,
     tags=["shopsmart", "ingestion", "snowflake", "parallel"],
@@ -45,9 +45,9 @@ def multi_channel_sales_sync():
     def sync_amazon_orders() -> dict:
         """
         Pull the last hour of Amazon orders via SP-API.
-        Runs on the `high_memory` worker queue - Amazon payloads include
-        full line-item breakdowns, shipping history, and buyer info, which
-        can be 10x the size of other channels.
+        Runs on the `high_memory` worker queue because Amazon payloads can be heavy lift.
+        UPDATE: Tried with the high_memory worker queue but the task was stuck on "queued" status.
+        The worker queue is there - just not attached to this task.
         """
         print("Pulling Amazon orders (on high_memory queue)...")
         fake_count = 389
