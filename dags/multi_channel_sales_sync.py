@@ -41,7 +41,8 @@ def multi_channel_sales_sync():
         print("Pulling Shopify orders for the last hour...")
         fake_count = 142
         return {"channel": "shopify", "orders_synced": fake_count} #returning a made up dict
-    @task
+
+    @task(queue='high-memory')
     def sync_amazon_orders() -> dict:
         """
         Pull the last hour of Amazon orders via SP-API.
